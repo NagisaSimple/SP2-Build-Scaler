@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ja">
+<link rel="icon" href="favicon_p-lab.ico">
+<head>
+	<meta charset="utf-8">
+	<title>BuildScaler</title>
+</head>
+<body>
+	<h2>SP2用機体XML一括拡縮ツール</h2>
+	<hr>
+		<table>
+			<tr onmouseover="showStatus('機体のxmlファイルを指定')">
+				<th>xml読込</th>
+				<td><input id="load" type="file"/></td>
+			</tr>
+			<tr onmouseover="showStatus('機体の倍率を指定')">
+				<th>倍率</th>
+				<td><input id="scale" type="number" value="1" min="0.000001" step="0.1" /></td>
+			</tr>
+			<tr onmouseover="showStatus('scaleを変更しているJFuselage(SP2版の新Fuselage)がある場合に1,1,1に直すか')">
+				<th>JFuselage正規化</th>
+				<td><input id="JFuselageNormalize" type="checkbox" checked/></td>
+			</tr>
+			<tr onmouseover="showStatus('xmlをスケール変更して出力')">
+				<th>xml出力</th>
+				<td><button onclick="buildScaler()">出力</button><input id="saveName" type="text" placeholder="保存名" /></td>
+			</tr>
+		</table>
+	<hr>
+	<table><tr>
+	<td id="message" valign="top" style="height:150px">項目にポインターを合わせるとここに説明が表示されます</td>
+	<tr></table>
+<a id="link"></a>
+</body>
+
+<script src="BuildScaler2_WebVer.js"></script>
+</html>
