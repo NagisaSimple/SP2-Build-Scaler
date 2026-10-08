@@ -13,8 +13,13 @@ let roundScale = 20000;	//少数丸めの桁指定値
 
 let noScaleParts = {	//Fuselage以外の普通にスケーリングすると不都合のある奴　{パーツ名:{タグ名{スケーリングしたいオプション名:[オプションが欠落している場合の初期値]}}}
 	"TextureDecal-1":{"TextureDecal.State":{"position":[0,0,0], "size":[0,0,0]}},
-	"TextDecal-1":{"TextureDecal.State":{"position":[0,0,0], "size":[0,0,0], "fontSize":[1]}},
-	"JDriveShaft-1":{"JDriveShaft.State":{"radius":[1]}}
+	"TextDecal-1":{"TextureDecal.State":{"position":[0,0,0], "size":[0,0,0], "fontSize":[0]}},
+	"JDriveShaft-1":{"JDriveShaft.State":{"radius":[0]}},
+	"JWing-1":{"Slice":{"position":[0],"offset":[0],"scale":[0]}},
+	"ControlSurface-Slat-1":{"ControlSurfacePart.State":{"range":[0,0],"startPos":[0,0],"dummyWingOffset":[0,0],"dummyWingScale":[0,0]}},
+	"ControlSurface-Flap-1":{"ControlSurfacePart.State":{"range":[0,0],"startPos":[0,0],"dummyWingOffset":[0,0],"dummyWingScale":[0,0]}},
+	"ControlSurface-Flap-2":{"ControlSurfacePart.State":{"range":[0,0],"startPos":[0,0],"dummyWingOffset":[0,0],"dummyWingScale":[0,0]}},
+	"ControlBase-Joystick-1":{"Part":{"scale":[0]},"PositionAxis":{"scale":[0]}}
 };
 
 function buildScaler(){
@@ -58,7 +63,7 @@ function buildScaler(){
 			for(line in currentPart){
 				if(currentPart[line][0] == "JFuselage.State"){
 					currentPart[line][1]["offset"] = [fixVal(currentPart[line][1]["offset"][0] * partScale[0]), fixVal(currentPart[line][1]["offset"][1] * partScale[1]), fixVal(currentPart[line][1]["offset"][2] * partScale[2])];
-				}else if(currentPart[line][0] == "Slice"){
+				}else if(currentPart[line][0] == "Slice" || currentPart[line][0] == "SectionA" || currentPart[line][0] == "SectionB"){
 					currentPart[line][1]["size"] = [fixVal(currentPart[line][1]["size"][0] * partScale[0]), fixVal(currentPart[line][1]["size"][1] * partScale[1])];
 					for(axis in currentPart[line][1]["cornerRadii"]){
 						if(currentPart[line][1]["cornerStretch"][axis] != "True"){
@@ -90,10 +95,12 @@ function buildScaler(){
 					includeSize = true;
 				}
 			}
-			if("scale" in currentPart[0][1] && !includeSize){	//普通にスケーリングして大丈夫な奴
-				currentPart[0][1]["scale"] = [fixVal(currentPart[0][1]["scale"][0] * scale), fixVal(currentPart[0][1]["scale"][1] * scale), fixVal(currentPart[0][1]["scale"][2] * scale)];
-			}else{
-				currentPart[0][1]["scale"] = [scale, scale, scale];
+			if(!includeSize){	//普通にスケーリングして大丈夫な奴
+				if("scale" in currentPart[0][1]){
+					currentPart[0][1]["scale"] = [fixVal(currentPart[0][1]["scale"][0] * scale), fixVal(currentPart[0][1]["scale"][1] * scale), fixVal(currentPart[0][1]["scale"][2] * scale)];
+				}else{
+					currentPart[0][1]["scale"] = [scale, scale, scale];
+				}
 			}
 		}
 		oText += list2text(currentPart);	//編集後のパーツを出力用文字列へ追記
