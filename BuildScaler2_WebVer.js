@@ -31,7 +31,16 @@ function buildScaler(){
 	let text = getAllText();
 	text = text.split(text.match(/\r\n/) != null ? "\r\n" : "\n");
 	let oText = "";	//出力用文字列
-	let i = 0;
+	oText += text[0] + "\r\n";
+	let aircraft = getXMLTag(text[1]);
+	for(let axis = 0; axis < 3; axis++){
+		aircraft[1]["paintOrigin"][axis] *= scale;
+		aircraft[1]["size"][axis] *= scale;
+		aircraft[1]["boundsOffset"][axis] *= scale;
+		aircraft[1]["boundsMin"][axis] *= scale;
+	}
+	oText += list2text([aircraft]);
+	let i = 2;
 	while(i < text.length && text[i].match(/^ *?<Parts>/) == null){	//パーツ行が始まるまでスキップ
 		oText += text[i] + "\r\n";
 		i++;
@@ -40,7 +49,7 @@ function buildScaler(){
 		showStatus("エラー：xmlの解析に失敗(<Parts>セクションの先頭を発見出来ず)");
 		return;
 	}
-	showStatus("<Parts>セクションを発見("+(i+1)+"行)");
+	//showStatus("<Parts>セクションを発見("+(i+1)+"行)");
 	oText += text[i] + "\r\n";
 	i++;
 	let currentPart;
@@ -109,7 +118,42 @@ function buildScaler(){
 		showStatus("エラー：xmlの解析に失敗(<Parts>セクションの終端を発見出来ず)");
 		return;	
 	}
-	showStatus("<Parts>セクションの終端を発見("+(i+1)+"行)");
+	//showStatus("<Parts>セクションの終端を発見("+(i+1)+"行)");
+	oText += text[i] + "\r\n";
+	i++;
+	while(i < text.length && text[i].match(/^ *?<Theme /) == null){	//パレット行が始まるまでスキップ
+		oText += text[i] + "\r\n";
+		i++;
+	}
+	if(i == text.length){
+		showStatus("エラー：xmlの解析に失敗(<Theme>セクションの先頭を発見出来ず)");
+		return;
+	}
+	//showStatus("<Theme>セクションを発見("+(i+1)+"行)");
+	oText += text[i] + "\r\n";
+	i++;
+	let currentPaint;
+	while(i < text.length && text[i].match(/^ *?<\/Theme>/) == null){	//ペイントテクスチャの処理
+		let data = text2list(text,i);
+		currentPaint = data[0];
+		i = data[1];
+		if(currentPaint.length > 1){
+			const sNameList = ["textureScale", "textureOffset"];
+			for(axis in currentPaint[0][1]["textureOffset"]){
+				currentPaint[0][1]["textureOffset"][axis] *= scale;
+			}
+			for(axis in currentPaint[0][1]["textureScale"]){
+				currentPaint[0][1]["textureScale"][axis] /= scale;
+			}
+			
+		}
+		oText += list2text(currentPaint);	//編集後のパレットを出力用文字列へ追記
+	}
+	if(i == text.length){
+		showStatus("エラー：xmlの解析に失敗(<Theme>セクションの終端を発見出来ず)");
+		return;	
+	}
+	//showStatus("<Theme>セクションの終端を発見("+(i+1)+"行)");
 	oText += text[i] + "\r\n";
 	i++;
 	while(i < text.length){//最後までコピー
@@ -213,8 +257,9 @@ function text2list(iText, index){	//xml文字列からパーツ情報を抽出�
 	let data = [];
 	let i = index;
 	data.push(getXMLTag(iText[i]));
+	let endLine = new RegExp("^ *?<\\/"+data[0][0]+">");
 	if(data[0][3] == ">"){
-		while(iText[i].match(/^ *?<\/Part>/) == null){
+		while(iText[i].match(endLine) == null){
 			i++;
 			data.push(getXMLTag(iText[i]));
 		}
